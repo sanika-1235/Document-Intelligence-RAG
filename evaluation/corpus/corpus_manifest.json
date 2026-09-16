@@ -1,0 +1,18 @@
+{
+  "manifest_version": "1.0",
+  "corpus_id": "csu_student_handbook_2019",
+  "title": "Caraga State University Student Handbook",
+  "edition": "BOR Res. No. 50-22, s. 2019",
+  "document_count": 1,
+  "documents": [
+    {
+      "document_id": "csu_student_handbook_2019",
+      "expected_filename": "CSU-Student-Handbook.pdf",
+      "expected_relative_path": "evaluation/corpus/CSU-Student-Handbook.pdf",
+      "sha256": "ce3c2818ea5ba171a2e75b51d3db14970f57d4d54515eccc0c0a275470be4841",
+      "size_bytes": 1784539,
+      "page_count": 93
+    }
+  ],
+  "distribution": "local-only; source PDF is not included in the repository"
+}

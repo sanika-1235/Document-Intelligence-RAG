@@ -232,6 +232,9 @@ model-artifacts/
 storage/documents/*
 !storage/documents/.gitkeep
 
+# Local evaluation corpus
+evaluation/corpus/*.pdf
+
 # Local database files
 *.db
 *.db-journal
