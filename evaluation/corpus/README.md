@@ -1,27 +1,23 @@
 # Evaluation Corpus
 
-## Purpose
+DDRAG's official evaluation uses one fixed local source document.
 
-This directory contains local source material used for DDRAG evaluation.
-
-## Expected corpus
-
-The expected local file is `CSU-Student-Handbook.pdf`, identified by:
-
-```text
-corpus_id = csu_student_handbook_2019
-```
+| Field | Value |
+| --- | --- |
+| Corpus ID | `csu_student_handbook_2019` |
+| Expected local filename | `CSU-Student-Handbook.pdf` |
+| SHA-256 | `ce3c2818ea5ba171a2e75b51d3db14970f57d4d54515eccc0c0a275470be4841` |
+| Size | 1,784,539 bytes |
+| Physical PDF pages | 93 |
 
 ## Public repository policy
 
-The source PDF is intentionally not tracked by Git and is not included in the repository. The tracked `corpus_manifest.json` records the SHA-256 digest that identifies the exact local file used by official evaluation runs. Users who want to reproduce this benchmark must supply the source PDF locally at the expected path.
+The source PDF is not redistributed in this repository and is intentionally ignored by Git. Users seeking exact official-result reproduction must obtain the source document through an authorized, lawful source and place the matching file at `evaluation/corpus/CSU-Student-Handbook.pdf`. This repository does not provide or endorse an unofficial mirror.
 
-## Verification
-
-From the repository root, calculate the file's SHA-256 digest in PowerShell:
+The tracked `corpus_manifest.json` records the same identity metadata without containing source-document text. Verify the local file before an official evaluation run:
 
 ```powershell
 Get-FileHash evaluation/corpus/CSU-Student-Handbook.pdf -Algorithm SHA256
 ```
 
-The calculated digest, compared case-insensitively, must match the lowercase `sha256` value in `corpus_manifest.json`.
+The hexadecimal digest must match the documented SHA-256 (letter case does not change the digest). Strict validation also checks the filename, byte size, page count, benchmark anchors, and benchmark identity when the authorized private benchmark is locally available. Matching inputs are necessary to repeat the protocol; they do not guarantee identical model outputs under runtime-default sampling.

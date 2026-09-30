@@ -232,8 +232,50 @@ model-artifacts/
 storage/documents/*
 !storage/documents/.gitkeep
 
-# Local evaluation corpus
-evaluation/corpus/*.pdf
+# Local/private evaluation artifacts
+/evaluation/corpus/*.pdf
+/evaluation/benchmarks/csu_handbook_v1.jsonl
+/evaluation/benchmarks/csu_handbook_v1_review.md
+/evaluation/reviews/
+/evaluation/runs/*
+!/evaluation/runs/.gitignore
+
+# Private/internal evaluation support artifacts
+/evaluation/analysis/e11_control_failure_matrix.csv
+/evaluation/analysis/e11_failure_analysis.json
+/evaluation/experiments/e10_expected_point_qualitative_crosscheck.jsonl
+/evaluation/experiments/e10_final_comparison.json
+/evaluation/experiments/e10_paired_deterministic_summary.json
+/evaluation/experiments/e10_paired_execution_manifest.json
+/evaluation/experiments/e10_shared_environment.json
+/evaluation/experiments/e10_unblinded_question_qualitative.jsonl
+/evaluation/experiments/e10a5_post_recovery_paired_design.md
+/evaluation/experiments/e10a_generation_model_comparison.md
+/evaluation/experiments/e11_control_failure_matrix.csv
+/evaluation/experiments/e11_execution_source_state.json
+/evaluation/experiments/e11_expected_point_qualitative_crosscheck.jsonl
+/evaluation/experiments/e11_next_experiment_proposal.md
+/evaluation/experiments/e11_paired_deterministic_summary.json
+/evaluation/experiments/e11_paired_execution_manifest.json
+/evaluation/experiments/e11_prompt_final_comparison.json
+/evaluation/experiments/e11_target_subset_qualitative_comparison.jsonl
+/evaluation/experiments/e11_unblinded_question_qualitative.jsonl
+/evaluation/experiments/e11b1_prompt_switch_infrastructure.md
+/evaluation/experiments/e11b_prompt_design.md
+/evaluation/reports/e12_artifact_classification.md
+/evaluation/reports/e13_packaging_preflight.md
+/evaluation/reports/e13b_portfolio_packaging_audit.md
+/evaluation/reports/publication_editorial_audit.md
+
+# Private execution and planning provenance; aggregate findings are in the public reports
+/evaluation/experiments/e10b_paired_execution.md
+/evaluation/experiments/e11c_paired_prompt_execution.md
+/evaluation/analysis/e11_failure_analysis.md
+
+# Benchmark-specific matcher rules, official regression fixtures, and private audits
+/evaluation/private/
+/evaluation/reports/publication_blocker_remediation.md
+/evaluation/reports/publication_editorial_reaudit.md
 
 # Local database files
 *.db

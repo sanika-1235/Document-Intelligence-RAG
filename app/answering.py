@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.citations import validate_citations
+from app.config import get_settings
 from app.context import ContextSource, assemble_context
 from app.generation import OllamaGenerationError, generate_answer
 from app.prompting import build_system_prompt, build_user_prompt
@@ -55,7 +56,7 @@ def answer_question(
         )
 
     context = assemble_context(retrieval.results)
-    system_prompt = build_system_prompt()
+    system_prompt = build_system_prompt(get_settings().generation_prompt_id)
     user_prompt = build_user_prompt(normalized_question, context.context_text)
     generated_answer = generate_answer(system_prompt, user_prompt)
     citation_validation = validate_citations(generated_answer, context.citation_map)

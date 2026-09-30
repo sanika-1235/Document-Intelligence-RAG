@@ -3,10 +3,15 @@
 from functools import lru_cache
 from urllib.parse import urlparse
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.chunking import DEFAULT_CHUNKING_VERSION, validate_chunking_config
+from app.prompting import (
+    PRODUCTION_PROMPT_ID,
+    PromptResolutionError,
+    resolve_prompt_identity,
+)
 
 EMBEDDING_DIMENSION = 1024
 
@@ -39,9 +44,20 @@ class Settings(DatabaseSettings):
     chunking_version: str = DEFAULT_CHUNKING_VERSION
     embedding_model: str = "qwen3-embedding:0.6b"
     generation_model: str = "qwen2.5:1.5b"
+    generation_prompt_id: str = PRODUCTION_PROMPT_ID
     ollama_base_url: str = "http://127.0.0.1:11434"
     embedding_dimension: int = EMBEDDING_DIMENSION
     retrieval_default_top_k: int = 5
+
+    @field_validator("generation_prompt_id")
+    @classmethod
+    def _validate_generation_prompt_id(cls, value: str) -> str:
+        normalized_id = value.strip()
+        try:
+            resolve_prompt_identity(normalized_id)
+        except PromptResolutionError as exc:
+            raise ValueError(str(exc)) from exc
+        return normalized_id
 
     @model_validator(mode="after")
     def _validate_chunking_settings(self) -> "Settings":

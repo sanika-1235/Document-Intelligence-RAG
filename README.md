@@ -8,23 +8,17 @@ DDRAG is a local-first retrieval-augmented generation (RAG) application for aski
 
 🎥 **[Watch the DDRAG demo on YouTube](https://youtu.be/F0H7eqERpBA)**
 
-The video demonstrates account creation, document ingestion, semantic retrieval, grounded answers with sources, and persistent chat history.
+The video demonstrates account creation, document ingestion, semantic retrieval, answers with source attribution, and persistent chat history.
 
 DDRAG runs locally with Docker, PostgreSQL + pgvector, and Ollama, keeping documents and model inference on the local machine.
 
 ### Interface preview
 
 <p align="center">
-  <img src="docs/images/desktop-chat.png" alt="DDRAG desktop chat showing a grounded answer, source attribution, and chat history" width="100%">
+  <img src="docs/images/desktop-chat.png" alt="DDRAG desktop chat showing an answer, source attribution, and chat history" width="100%">
 </p>
 
-*A grounded response with its retrieved source metadata and a persisted chat session.*
-
-<p align="center">
-  <img src="docs/images/desktop-documents.png" alt="DDRAG document library showing upload controls and a processed document" width="88%">
-</p>
-
-*Document upload, processing feedback, and the authenticated user's document library.*
+*An example response with retrieved source metadata and a persisted chat session; source display alone does not establish answer grounding.*
 
 <p align="center">
   <img src="docs/images/mobile-chat.png" alt="DDRAG responsive mobile chat interface" width="34%">
@@ -50,7 +44,7 @@ Upload document → Extract text → Create overlapping chunks → Generate embe
        → Build grounded context → Generate locally → Return answer + sources
 ```
 
-The backend treats retrieved text as reference material and instructs the model to answer from the supplied context. When retrieval finds no relevant chunks, DDRAG returns an insufficient-information response without calling the generation model.
+The backend treats retrieved text as reference material and instructs the model to answer from the supplied context. When retrieval returns no usable context, DDRAG returns an insufficient-information response without calling the generation model. Retrieval has no relevance threshold, so a non-empty result does not establish that the question is answerable.
 
 ## Architecture
 
@@ -86,18 +80,6 @@ FastAPI handles authentication, authorization, ingestion, retrieval, generation,
 
 Prerequisites: Git, Docker with Docker Compose, Ollama, and Node.js with npm. Python 3.13 is only required when running the backend outside Docker.
 
-### Option 1 — Coding agent
-
-Paste this into a repository-capable coding agent:
-
-```text
-Set up DDRAG from https://github.com/drZania/ddrag.git for local development.
-Follow the repository's AGENTS.md for prerequisites, environment setup, Ollama models, Docker services, frontend setup, and verification.
-Preserve any existing environment files, databases, and Docker volumes.
-```
-
-### Option 2 — Manual setup
-
 Clone the repository:
 
 ```bash
@@ -105,7 +87,7 @@ git clone https://github.com/drZania/ddrag.git
 cd ddrag
 ```
 
-Create the backend environment file. Use `Copy-Item .env.example .env` in PowerShell or `cp .env.example .env` on Linux/macOS. Replace the checked-in `JWT_SECRET` placeholder in `.env` with a unique local value.
+If the backend `.env` file is absent, create it with `if (-not (Test-Path .env)) { Copy-Item .env.example .env }` in PowerShell or `test -f .env || cp .env.example .env` on Linux/macOS. Preserve any existing `.env`. Replace the checked-in `JWT_SECRET` placeholder in a newly created file with a unique local value.
 
 Pull the local models and start the database and backend:
 
@@ -120,8 +102,8 @@ In a second terminal, prepare and start the frontend:
 ```bash
 cd frontend
 npm ci
-# PowerShell: Copy-Item .env.example .env
-# Linux/macOS: cp .env.example .env
+# PowerShell: if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# Linux/macOS: test -f .env || cp .env.example .env
 npm run dev
 ```
 
@@ -142,6 +124,38 @@ npm run typecheck
 npm run build
 ```
 
+## Evaluation
+
+DDRAG evaluates retrieval, answer correctness, grounding, refusal behavior, operational reliability, and latency as separate dimensions. It does not combine them into one overall accuracy score.
+
+The evaluation uses a fixed 40-question Caraga State University (CSU) Student Handbook benchmark: 34 answerable, 3 ambiguous, and 3 unanswerable questions. The source PDF and handbook-derived benchmark are not redistributed; reproducing the study requires authorized copies matching the published [benchmark metadata](evaluation/benchmarks/README.md) and [corpus identity](evaluation/corpus/README.md).
+
+Historical baseline retrieval results over the 37 retrieval-eligible questions were:
+
+| Metric | Result |
+| --- | ---: |
+| Hit@5 | 0.973 |
+| Recall@5 | 0.851 |
+| CompleteEvidence@5 | 0.730 |
+
+These are retrieval measures, not overall answer accuracy. Complete evidence retrieval remained weaker than finding at least one required evidence unit, and generation incompleteness could remain even when retrieval was complete.
+
+Under the frozen benchmark and tested local setup, the paired generation-model experiment did not support adopting `qwen2.5:3b`; DDRAG retained `qwen2.5:1.5b`. The `ddrag-answer-completeness-v1` prompt produced some useful refusal improvements but did not improve the predeclared complete-retrieval generation-failure population, so `ddrag-production-v1` was retained.
+
+The retained tested configuration is:
+
+| Component | Value |
+| --- | --- |
+| Generation | `qwen2.5:1.5b` |
+| Prompt | `ddrag-production-v1` |
+| Embedding | `qwen3-embedding:0.6b` |
+| Retrieval | owner-scoped pgvector cosine, top-K 5 |
+| Chunking | 1000 characters with 200-character overlap |
+
+Only the generation model and generation prompt received completed controlled comparisons. The embedding model, top-K, chunk size, chunk overlap, and retrieval strategy were retained for continuity and were not established as optimal.
+
+Qualitative judgments used blinded AI-assisted review and independent adjudication; they complement deterministic metrics and do not constitute an objective ground truth. Known limitations include incomplete multi-chunk and summarization coverage, substantial local generation latency, one corpus and 40-question benchmark, and private inputs required to reproduce the study. See the [evaluation article](evaluation/reports/ddrag_evaluation_article.md), [evaluation guide](evaluation/README.md), and [frozen evidence report](evaluation/reports/ddrag_evaluation_report.md).
+
 ## Design Highlights
 
 - **PostgreSQL + pgvector** keeps relational ownership data, document chunks, and embeddings in one transactional data store.
@@ -158,6 +172,7 @@ app/                    FastAPI application and RAG pipeline
 frontend/src/           React interface and API client
 migrations/             Alembic schema history
 tests/                  Backend tests and database safety setup
+evaluation/             Evaluation framework, metadata, selected evidence, and reports
 docs/ARCHITECTURE.md    System design and request flows
 docs/DEVELOPMENT.md     Detailed local development guide
 ```

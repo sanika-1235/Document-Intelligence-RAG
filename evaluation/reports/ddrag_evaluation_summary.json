@@ -1,0 +1,217 @@
+{
+  "report_version": "1.0.0",
+  "scope": "Frozen CSU Student Handbook benchmark and tested local DDRAG environment; descriptive reporting and traceability only.",
+  "corpus": {
+    "corpus_id": "csu_student_handbook_2019",
+    "title": "Caraga State University Student Handbook",
+    "edition": "BOR Res. No. 50-22, s. 2019",
+    "sha256": "ce3c2818ea5ba171a2e75b51d3db14970f57d4d54515eccc0c0a275470be4841",
+    "document_count": 1,
+    "page_count": 93,
+    "distribution": "local-only"
+  },
+  "benchmark": {
+    "benchmark_id": "csu_handbook",
+    "version": "1.0.0",
+    "sha256": "f2d5e90b252f288572f617d56e27f1a003e18b1171421881c636793e32137ae0",
+    "question_count": 40,
+    "retrieval_eligible_question_count": 37
+  },
+  "final_retained_configuration": {
+    "generation_model": "qwen2.5:1.5b",
+    "prompt_id": "ddrag-production-v1",
+    "prompt_sha256": "425edd4569bc82ba8aa292c842846ae65c186abf2c622b5cdbc3af98a24d0462",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "embedding_dimension": 1024,
+    "top_k": 5,
+    "chunk_size_chars": 1000,
+    "chunk_overlap_chars": 200,
+    "retrieval_strategy": "pgvector_cosine_distance_owner_scoped_v1",
+    "sampling_mode": "runtime_default",
+    "decision_scope": "Generation model and prompt were experimentally compared. Retrieval settings were retained without an optimization experiment or a comparative preference claim."
+  },
+  "e9_baseline": {
+    "role": "historical baseline only",
+    "run_id": "run_20260917T190905419720Z_54784f01",
+    "raw_results_sha256": "ed4039a1bdb543f2d0109b2270bde8ea9f175568beaed259676f80b5a9b60d30",
+    "baseline_report_sha256": "0f30c56f7f4b8cca57d0a23f9b949848f81e9fe88f5d23969deeeea0d471d46a",
+    "retrieval": {
+      "hit_at_5": 0.972972972972973,
+      "recall_at_5": 0.850900900900901,
+      "complete_evidence_at_5": 0.7297297297297297,
+      "eligible_n": 37
+    },
+    "expected_point_coverage": {
+      "matched_points": 10,
+      "eligible_points": 18,
+      "mean": 0.5454545454545454,
+      "eligible_question_n": 11,
+      "interpretation": "automated lexical answer-content proxy, not semantic correctness"
+    },
+    "qualitative": {
+      "method": "blinded AI-assisted qualitative evaluation with independent secondary adjudication and human final review/sign-off",
+      "correctness": {
+        "correct": 15,
+        "mostly_correct": 7,
+        "partial": 14,
+        "incorrect": 4,
+        "not_applicable": 0
+      },
+      "grounding": {
+        "grounded": 26,
+        "partially_grounded": 11,
+        "unsupported": 2,
+        "not_applicable": 1
+      },
+      "refusal": {
+        "appropriate": 2,
+        "failed_refusal": 1,
+        "over_refusal": 1,
+        "not_applicable": 36
+      }
+    },
+    "operations": {
+      "successes": 40,
+      "failures": 0
+    },
+    "latency_ms": {
+      "retrieval_mean": 190.976,
+      "generation_mean": 14952.936955000769
+    }
+  },
+  "e10": {
+    "experiment_scope": "Fresh post-recovery paired generation-model comparison on a shared index; historical E9 is contextual, not the causal control.",
+    "qualitative_method": "blinded dual-reviewer qualitative evaluation with independent disagreement adjudication and post-freeze unblinding; independent review was AI-assisted/AI-based",
+    "retrieval_identity": {
+      "identical_ordered_retrievals": 40,
+      "total_questions": 40
+    },
+    "control": {
+      "generation_model": "qwen2.5:1.5b",
+      "raw_results_sha256": "ab3a4fa45c30c3ed147521b6684b0137e687688e0da42994273a35094d39d3d9",
+      "operations": {"successes": 39, "failures": 1},
+      "correctness": {"correct": 12, "mostly_correct": 5, "partial": 18, "incorrect": 4, "not_applicable": 1},
+      "grounding": {"grounded": 27, "partially_grounded": 11, "unsupported": 1, "not_applicable": 1},
+      "over_refusal": 1,
+      "generation_latency_mean_ms": 14178.54636922913
+    },
+    "candidate": {
+      "generation_model": "qwen2.5:3b",
+      "raw_results_sha256": "b2c7f6c544d048dc37c86e721c8e5a5eefd763df3012136e48624138e4cfecce",
+      "operations": {"successes": 39, "failures": 1},
+      "correctness": {"correct": 4, "mostly_correct": 0, "partial": 2, "incorrect": 33, "not_applicable": 1},
+      "grounding": {"grounded": 6, "partially_grounded": 5, "unsupported": 28, "not_applicable": 1},
+      "over_refusal": 34,
+      "generation_latency_mean_ms": 19918.147848718294
+    },
+    "principal_findings": {
+      "paired_correctness": {"candidate_higher": 0, "same": 9, "candidate_lower": 29, "not_comparable": 2},
+      "generation_latency_candidate_minus_control_ms": 5739.6014794891635,
+      "interpretation": "The larger candidate systematically over-refused under the tested fixed prompt/context; this is not a universal model ranking."
+    },
+    "scoped_decision": "retain qwen2.5:1.5b"
+  },
+  "e11a": {
+    "source_sha256": "643a47d272fbf8046131a81b6fa5ea4ea99461c3501d6b1d32f67d968e651e27",
+    "root_cause_counts": {
+      "COMPLETE_RETRIEVAL_GENERATION_FAILURE": 12,
+      "INCOMPLETE_RETRIEVAL_WITH_ANSWER_FAILURE": 7,
+      "AMBIGUOUS_OR_UNANSWERABLE_EDGE_CASE": 6,
+      "OPERATIONAL_FAILURE": 1,
+      "SUCCESS_OR_NEAR_SUCCESS": 14
+    },
+    "complete_retrieval_answer_failure": {"count": 12, "denominator": 26, "rate": 0.4615},
+    "partial_answer_tags": {"total": 23, "complete_retrieval": 13, "incomplete_retrieval": 10},
+    "incomplete_retrieval_failure_concentration": {"multi_chunk": 3, "summarization": 3, "procedural": 1},
+    "experiment_selection_interpretation": "Prompt behavior was selected as the immediate controlled experiment; retrieval coverage remained a future-work candidate."
+  },
+  "e11": {
+    "experiment_scope": "Fresh paired prompt comparison holding the generation model and retrieval pipeline fixed; only prompt ID/hash differed.",
+    "qualitative_method": "blinded dual-reviewer qualitative evaluation with independent disagreement adjudication and post-freeze unblinding; independent review was AI-assisted/AI-based",
+    "prompt_control": {
+      "prompt_id": "ddrag-production-v1",
+      "prompt_sha256": "425edd4569bc82ba8aa292c842846ae65c186abf2c622b5cdbc3af98a24d0462",
+      "length_chars": 2022,
+      "raw_results_sha256": "af9622b5348771f09ecaab42f5fb1b4d34e2c1ee55bad81002de4e6ce90ec3a0"
+    },
+    "prompt_candidate": {
+      "prompt_id": "ddrag-answer-completeness-v1",
+      "prompt_sha256": "17657d3e30a781fe44267c07e1867c2fac55791b34b50098918379fe98681771",
+      "length_chars": 3320,
+      "length_increase_percent": 64.193867,
+      "raw_results_sha256": "957295ae5f7186cb8ce3623ed8845f2a448f7433f35843129e3a8c10433d35a4"
+    },
+    "retrieval_identity": {"identical_ordered_retrievals": 40, "total_questions": 40},
+    "operations": {
+      "control": {"successes": 40, "failures": 0},
+      "candidate": {"successes": 40, "failures": 0}
+    },
+    "primary_target_result": {
+      "question_count": 12,
+      "control_correctness": {"mostly_correct": 4, "partial": 4, "incorrect": 4},
+      "candidate_correctness": {"mostly_correct": 2, "partial": 7, "incorrect": 3},
+      "transitions": {
+        "candidate_higher": 2,
+        "same": 7,
+        "candidate_lower": 3,
+        "higher_question_ids": ["Q020", "Q024"],
+        "lower_question_ids": ["Q010", "Q019", "Q027"]
+      },
+      "conclusion": "No net correctness improvement on the predeclared complete-retrieval generation-failure subset."
+    },
+    "complete_retrieval_result": {
+      "answerable_denominator": 26,
+      "partial_or_incorrect": {"control": 12, "candidate": 12},
+      "partial_answer_tag": {"control": 12, "candidate": 13}
+    },
+    "overall_correctness": {
+      "control": {"correct": 12, "mostly_correct": 7, "partial": 13, "incorrect": 8},
+      "candidate": {"correct": 8, "mostly_correct": 12, "partial": 16, "incorrect": 4},
+      "paired_transitions": {"candidate_higher": 7, "same": 24, "candidate_lower": 9}
+    },
+    "grounding_transitions": {"candidate_higher": 8, "same": 22, "candidate_lower": 10},
+    "safety_and_failure_mode_changes_candidate_minus_control": {
+      "hallucination": 1,
+      "unsupported_claim": 2,
+      "partial_answer": 2,
+      "retrieval_failure": 1,
+      "over_refusal": 1,
+      "failed_refusal": -2,
+      "citation_issue": 4,
+      "q046": "incorrect/unsupported/failed_refusal to correct/grounded/appropriate",
+      "q047_q048": "appropriate in both arms"
+    },
+    "expected_point_coverage": {
+      "control": {"matched_points": 13, "eligible_points": 18, "mean": 0.6818181818181818},
+      "candidate": {"matched_points": 11, "eligible_points": 18, "mean": 0.5151515151515151},
+      "interpretation": "Automated lexical proxy with both aligned and divergent qualitative crosschecks; not the sole decision basis."
+    },
+    "latency": {
+      "generation_endpoint_mean_ms": {"control": 14551.198495000062, "candidate": 15091.538820000278, "delta": 540.3403250002157, "percent_change": 3.713},
+      "end_to_end_mean_ms": {"control": 14727.745995000063, "candidate": 15259.941070000277, "delta": 532.1950750002143, "percent_change": 3.614},
+      "interpretation": "Prompt length was part of the intervention and was not independently isolated."
+    },
+    "scoped_decision": "retain ddrag-production-v1"
+  },
+  "remaining_limitations": [
+    "one fixed corpus",
+    "40-question benchmark",
+    "one full run per configuration",
+    "runtime-default sampling",
+    "local hardware and runtime",
+    "no statistical-significance claims",
+    "no confidence intervals",
+    "AI-assisted/AI-based qualitative review methodology",
+    "ExpectedPointCoverage lexical limitations",
+    "PDF ingestion does not retain page metadata in retrieval",
+    "no relevance threshold",
+    "top-K fixed at 5",
+    "retrieval-setting, chunking, re-ranking, hybrid, and embedding optimization not exhaustively explored",
+    "post-recovery E10/E11 comparisons require fresh paired controls rather than historical E9 as a causal control"
+  ],
+  "future_work_candidates": [
+    "Controlled top-K 5 versus one predeclared larger K experiment; not executed",
+    "Independent explicit sampling/seed-control study",
+    "Controlled chunking, re-ranking, hybrid retrieval, or retrieval-representation studies"
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "manifest_version": "1.2.2",
+  "generated_at": "2026-09-30T22:33:02Z",
+  "artifact_hash_algorithm": "sha256",
+  "artifact_hash_basis": "git_repository_blob_bytes",
+  "evaluation_report_sha256": "0ed070b491dcfc9d636c0fe78c38ff278add121725490cc26c5f042b83067334",
+  "evaluation_summary_sha256": "061a69ac239008fcfc7ad2f7f2253ac64a81236ea86e38b5a43271b568590b7d",
+  "traceability_sha256": "90586f1677274a114a5fdb8aab90f9e61d1db42f7416e61ded98220e3d2e7d5a",
+  "corpus": {
+    "id": "csu_student_handbook_2019",
+    "sha256": "ce3c2818ea5ba171a2e75b51d3db14970f57d4d54515eccc0c0a275470be4841",
+    "redistributed": false
+  },
+  "benchmark": {
+    "id": "csu_handbook",
+    "version": "1.0.0",
+    "sha256": "f2d5e90b252f288572f617d56e27f1a003e18b1171421881c636793e32137ae0",
+    "question_count": 40,
+    "redistributed": false
+  },
+  "retained_configuration": {
+    "generation_model": "qwen2.5:1.5b",
+    "prompt_id": "ddrag-production-v1",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "top_k": 5,
+    "chunk_size": 1000,
+    "chunk_overlap": 200
+  },
+  "public_artifacts": [
+    {
+      "path": ".env.example",
+      "sha256": "4ba14f1a5b1eaf034bd0317850382351cf568488c1e3b1002c27a42f0347eb15"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "d88f63e58d8d21100381d5d86ac869b7b05c1cf3a1118800d6dce62b7c150104"
+    },
+    {
+      "path": "app/answering.py",
+      "sha256": "1d58c102bcfd0d6efadf228d7b123411f2625a2fbf1d9410f8105d4bbb88f579"
+    },
+    {
+      "path": "app/config.py",
+      "sha256": "678aafe3eee0e666b73845db55ab5471d880298662cdd0633593b3c73e43e40e"
+    },
+    {
+      "path": "app/prompting.py",
+      "sha256": "14896451aa67f6468b3675202f3ee737a3581898fab523e3d71d1c07a9d08f47"
+    },
+    {
+      "path": "docker-compose.yml",
+      "sha256": "292b4ecec12ae0d2ccea2120eb7321bc2797101e61b8a534277dc5ecbc54f0a0"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "28d8a296ba6b8d4f0072eaf993b58f29e04234ef830b2310453f9f467e9f5056"
+    },
+    {
+      "path": "docs/DEVELOPMENT.md",
+      "sha256": "fb7b5189836ddaa7f0c901f87bc2f620006bd47ce5665733e05a3c7bf95f9b2c"
+    },
+    {
+      "path": "evaluation/__init__.py",
+      "sha256": "e6de1dc399d4b8fb9d53b175343220d21882ace92ad9251b2b152f02ee0c404f"
+    },
+    {
+      "path": "evaluation/benchmarks/README.md",
+      "sha256": "5c7488aaa080d90073511ad719ef51370fbbde277149fbabfd1f371976ac9154"
+    },
+    {
+      "path": "evaluation/corpus/corpus_manifest.json",
+      "sha256": "43d6776d2f4881024894aa7560831bd3ce0c75d5fc2791e19b91f63cbbb2aac0"
+    },
+    {
+      "path": "evaluation/corpus/README.md",
+      "sha256": "90f612573a992f157dc2c1d0ac14025045ca7fa5fb6a2fd3e09acd16576ec0cc"
+    },
+    {
+      "path": "evaluation/experiments/e10_final_comparison.md",
+      "sha256": "3b98ae9a3993712599926fcecd873c5615aec92d3061b8ba6296ecdab10bf4da"
+    },
+    {
+      "path": "evaluation/experiments/e11_prompt_final_comparison.md",
+      "sha256": "61396a9ba25835691b54dcff363bc42f926b3a58c49ce85469a7478a61372078"
+    },
+    {
+      "path": "evaluation/human_review.py",
+      "sha256": "03cda15202c4eb05f8871e51c637e58fde801614f9dbfbf997a737c721791754"
+    },
+    {
+      "path": "evaluation/metrics.py",
+      "sha256": "2474c43b3f65f5f6c7103e7f3dc55040f1683d28dad5c2477d9ea810c47d6983"
+    },
+    {
+      "path": "evaluation/prompts/ddrag-answer-completeness-v1.txt",
+      "sha256": "16353d5d53834c0d4b419874a30f7018bf85f5e7170eec439cd4c8ae5267d274"
+    },
+    {
+      "path": "evaluation/README.md",
+      "sha256": "50e72a69661587b62437f97339de978c155992b5759e67887c81a476777b256b"
+    },
+    {
+      "path": "evaluation/reports/ddrag_evaluation_article.md",
+      "sha256": "154707795bb9c365841917c4f4faddb6c818d686b5d26303afb5fea40d398843"
+    },
+    {
+      "path": "evaluation/reports/ddrag_evaluation_report.md",
+      "sha256": "0ed070b491dcfc9d636c0fe78c38ff278add121725490cc26c5f042b83067334"
+    },
+    {
+      "path": "evaluation/reports/ddrag_evaluation_summary.json",
+      "sha256": "061a69ac239008fcfc7ad2f7f2253ac64a81236ea86e38b5a43271b568590b7d"
+    },
+    {
+      "path": "evaluation/reports/ddrag_evaluation_traceability.csv",
+      "sha256": "90586f1677274a114a5fdb8aab90f9e61d1db42f7416e61ded98220e3d2e7d5a"
+    },
+    {
+      "path": "evaluation/runner.py",
+      "sha256": "7168f3bfa949ff67628c91b9631e0c41367235ff70bb39a5d62a7bac2ff3b2c4"
+    },
+    {
+      "path": "evaluation/runs/.gitignore",
+      "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+    },
+    {
+      "path": "evaluation/schemas.py",
+      "sha256": "b62111f9429cc99dcb04fe5de5de643683dbee041193c9117da31270fe3807dc"
+    },
+    {
+      "path": "evaluation/tests/review_test_support.py",
+      "sha256": "51ca21f13b67687f2946a88e61c1828cc567d9c69b628804024edf9cbf4407f7"
+    },
+    {
+      "path": "evaluation/tests/test_benchmark_validation.py",
+      "sha256": "9e680d73dce57c3ab06fb8d584840b649a2d80c6386bc559b9b25e408be3e4d7"
+    },
+    {
+      "path": "evaluation/tests/test_configuration.py",
+      "sha256": "83a063f9da3d75162ac890b55169307ba7ec1be632757aa4bf370c3553c41587"
+    },
+    {
+      "path": "evaluation/tests/test_human_review_cli.py",
+      "sha256": "cef4a32ddf609bc7d284297a1093601c60230088d09bc1058508bbe71996e389"
+    },
+    {
+      "path": "evaluation/tests/test_human_review_prepare.py",
+      "sha256": "0aec33ee28e3ce0ea2b00b1135bbf6d54f09449bb489c40f3d7f55b9af6c2565"
+    },
+    {
+      "path": "evaluation/tests/test_human_review_unblind.py",
+      "sha256": "1055b285b543d3c594889fd419e9318ec34923480c75c619a17ed4f5cccf1caf"
+    },
+    {
+      "path": "evaluation/tests/test_human_review_validate.py",
+      "sha256": "af0c64b8a0e08137e13a195da2b63c22d743021a5c80949982b62151d3bb38fe"
+    },
+    {
+      "path": "evaluation/tests/test_metrics_aggregation.py",
+      "sha256": "0339a2b38cea1fd6dacf6da0e811fa43cf93462cfb0a406f89094186e3e6165b"
+    },
+    {
+      "path": "evaluation/tests/test_metrics_expected_points.py",
+      "sha256": "7cef40b91fbef4c434da5a3eb37ace7cc98a90a37e477521f7d6d046296bac8f"
+    },
+    {
+      "path": "evaluation/tests/test_metrics_refusal.py",
+      "sha256": "dd825a2804ad740dae688ed1c13296b162261ed6ac662198ead728ed9972d4f3"
+    },
+    {
+      "path": "evaluation/tests/test_metrics_retrieval.py",
+      "sha256": "434cf5b7d5827942dfde2e618b2839d9b30608fd079d0dd2ef7ab289c3a5688d"
+    },
+    {
+      "path": "evaluation/tests/test_results_and_annotations.py",
+      "sha256": "36ce7ba25e43fa094051dff9219070d3e9b335585db4c2d2f7c5893806a4c5c6"
+    },
+    {
+      "path": "evaluation/tests/test_runner_api.py",
+      "sha256": "06a83d8737a98533ce771af28b324fc9ec24b344e932fb2588f66d50714a6c6e"
+    },
+    {
+      "path": "evaluation/tests/test_runner_configuration.py",
+      "sha256": "387ae840c6f04063e9658d6ad3fbb39910cec53a1b80f923df36a1d5ec052e72"
+    },
+    {
+      "path": "evaluation/tests/test_runner_persistence.py",
+      "sha256": "84fa597774a50165845aa6968baaec1ce7a0de973207b7aef8bd000c7d9667fe"
+    },
+    {
+      "path": "evaluation/validation.py",
+      "sha256": "2d71f1367595433daee870ae6dfc27766287f680a2fbb8f19fca8d928f1d147a"
+    },
+    {
+      "path": "README.md",
+      "sha256": "c684303f063aacae31185dc1d9af1bf0810036fae428a4ec7c39bfb3b13407af"
+    },
+    {
+      "path": "tests/test_prompt_selection.py",
+      "sha256": "9a708ec14535ed1ba3063ceba4fd11fcbcbe6b581631c91e15485bbf32e4d7be"
+    }
+  ],
+  "private_required_for_exact_reproduction": [
+    "authorized source corpus PDF matching the published corpus hash",
+    "authorized official benchmark artifact matching the published benchmark hash",
+    "frozen raw baseline and controlled-comparison evidence",
+    "private reviewer packets, mappings, responses, adjudication, and reviewer-level provenance",
+    "local evaluation account and service state",
+    "official supplemental expected-point matcher rules and benchmark-derived answer fixtures"
+  ],
+  "qualitative_review_reproduction": "Exact qualitative replay is unavailable from public files alone. The baseline used blinded AI-assisted qualitative evaluation with independent secondary adjudication and human final review/sign-off. Controlled comparisons used blinded dual-reviewer qualitative evaluation with independent disagreement adjudication and post-freeze unblinding; independent review and adjudication were AI-assisted/AI-based. Reviewer-level inputs and workflow artifacts remain private.",
+  "public_artifact_hash_scope": "The public_artifacts array records the selected evaluation package and associated documentation/infrastructure, excluding this self-referential manifest. It does not enumerate every unchanged application file in the repository.",
+  "scope_note": "The reduced public package includes generic metric algorithms with explicit matcher injection, synthetic tests, framework contracts, runner and qualitative-review tooling, non-sensitive corpus/benchmark metadata, selected comparison appendices, a reader-facing article, and frozen reports. Official matcher rules and answer fixtures remain private alongside the source PDF, official benchmark/review, raw runs, reviewer mappings, execution/planning provenance, and credentials. Private source paths and hashes in the traceability matrix identify evidence without implying public availability. Only generation-model and generation-prompt alternatives received completed controlled comparisons; retained retrieval settings were not established as optimal.",
+  "publication_status": "PUBLICATION_READY_PENDING_GIT_REVIEW",
+  "publication_blockers": []
+}

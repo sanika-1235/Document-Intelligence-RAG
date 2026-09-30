@@ -1,6 +1,6 @@
 # DDRAG Architecture
 
-This document describes the architecture of DDRAG (Document Retrieval-Augmented Generation), a full-stack application for uploading documents and interacting with their contents through a grounded, locally hosted LLM.
+This document describes the architecture of DDRAG (Drag, Drop, Retrieve, Augment, Generate), a full-stack application for uploading documents and querying their contents through retrieval-augmented generation with a locally hosted LLM.
 
 The system is designed around a clear separation between document processing, vector retrieval, grounded generation, persistent chat, and the user interface.
 
@@ -348,6 +348,8 @@ This avoids introducing a separate vector database for the current system and ke
 
 DDRAG performs semantic retrieval using PostgreSQL pgvector cosine distance.
 
+The current retrieval configuration uses `qwen3-embedding:0.6b` with 1024-dimensional vectors, 1000-character chunks with 200-character overlap, and an owner-scoped top-K of 5. These are runtime architecture defaults, not claims that the embedding, chunking, or top-K values are optimal.
+
 The retrieval flow is:
 
 ```text
@@ -382,6 +384,8 @@ Chunks without embeddings are excluded from vector search.
 
 Results are ordered by cosine distance, with chunk ID used as a deterministic tie-breaker.
 
+There is currently no relevance-distance threshold: retrieval returns up to the requested top-K nearest owned chunks. PDF extraction joins page text into normalized document text, and persisted retrieval records do not retain the originating PDF page number.
+
 Each retrieved result contains metadata such as:
 
 * document ID
@@ -396,7 +400,7 @@ This metadata is later used to construct traceable source attribution.
 
 # 11. Grounded Generation
 
-Retrieval results are passed into the generation pipeline rather than allowing the LLM to answer from unrestricted outside knowledge.
+Retrieval results are passed into the generation pipeline, whose prompt instructs the LLM to use the supplied context. Prompt instructions cannot guarantee that every generated claim is supported.
 
 ```text
 Question
@@ -419,6 +423,12 @@ Grounded Answer + Sources
 ```
 
 The generation layer is intentionally separated from retrieval.
+
+### Internal prompt registry
+
+Generation prompts are selected through an internal allowlisted registry in `app/prompting.py`. `GENERATION_PROMPT_ID` configures the selection, and the default is `ddrag-production-v1`. Prompt selection is not exposed through the public API, and an unknown ID fails configuration or prompt resolution rather than silently falling back.
+
+The backend and evaluation runner resolve prompt identity through the same registry. The canonical prompt SHA-256 covers both the selected system prompt and stable user-message framing, so controlled evaluations can verify the exact prompt contract independently of runtime questions and retrieved context.
 
 ### Context assembly
 
@@ -463,6 +473,8 @@ retrieval_distance
 ```
 
 Citation validation checks whether cited ordinal identifiers correspond to sources actually supplied to the model.
+
+This is syntactic provenance validation: it detects missing or out-of-range citation identifiers but does not by itself prove that every generated claim is semantically supported by the cited text.
 
 The frontend displays only source metadata returned by the backend. It does not invent document names, page numbers, source text, or citations.
 
@@ -650,6 +662,15 @@ The major API areas are:
 
 Each protected resource uses the authenticated current-user dependency before performing ownership-sensitive operations.
 
+### Evaluation boundaries
+
+The evaluation runner uses the same authenticated production boundaries as the application:
+
+- `/retrieval` records retrieval independently, including ranked chunks, diagnostics, and retrieval-path duration;
+- `/generation` records the full retrieval-plus-grounded-generation path without creating ordinary chat-session persistence.
+
+Keeping these observations separate allows retrieval coverage to be measured without conflating it with generated-answer behavior. Evaluation uses the endpoints as implemented; it does not add a separate evaluation-only retrieval or generation pipeline.
+
 ---
 
 # 17. Local LLM Architecture
@@ -784,7 +805,7 @@ Document extraction, chunking, and embedding currently occur during the upload w
 
 ## Separate retrieval and generation layers
 
-Retrieval and generation are implemented as separate responsibilities. This makes it possible to reason about retrieval independently from LLM behavior and provides a clear boundary for future evaluation.
+Retrieval and generation are implemented as separate responsibilities. The evaluation framework observes these boundaries independently, separating retrieval coverage from generated-answer quality.
 
 ## Backend-controlled source attribution
 
@@ -800,7 +821,7 @@ Ollama provides local embedding and generation services, allowing the applicatio
 
 ## Deterministic chunking
 
-Fixed character windows and stored chunking metadata make reprocessing predictable and testable. This favors simplicity over token-aware or document-structure-aware boundaries; semantic chunking is a future retrieval-quality improvement.
+Fixed character windows and stored chunking metadata make reprocessing predictable and testable. Token-aware, document-structure-aware, and semantic chunking are possible future comparisons; a quality improvement has not been established.
 
 ## User-owned resources
 
@@ -850,4 +871,4 @@ Dockerized Backend + Database
 
 The architecture intentionally favors explicit boundaries, straightforward data ownership, and a small number of infrastructure components.
 
-Future improvements may include more advanced retrieval strategies, asynchronous processing, streaming generation, and systematic evaluation. These are outside the current architecture and should not be treated as implemented functionality.
+Systematic evaluation is implemented in the separate evaluation framework. Possible future extensions include controlled retrieval-strategy comparisons, asynchronous processing, and streaming generation; these extensions are not implemented or established improvements. See the [evaluation guide](../evaluation/README.md) for methodology and the [evaluation article](../evaluation/reports/ddrag_evaluation_article.md) for results and limitations.

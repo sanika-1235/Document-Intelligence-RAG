@@ -60,18 +60,18 @@ cd ddrag
 
 ## Step 2 — Create the environment file
 
-DDRAG provides an example configuration.
+DDRAG provides an example configuration. Create `.env` only when it is absent; preserve an existing file and its local settings.
 
 ### Windows PowerShell
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
 ### Linux/macOS
 
 ```bash
-cp .env.example .env
+test -f .env || cp .env.example .env
 ```
 
 For local development, the provided example already contains development defaults for PostgreSQL, JWT authentication, document storage, chunking, embeddings, retrieval, and Ollama.
@@ -233,18 +233,18 @@ Install the frontend dependencies:
 npm ci
 ```
 
-Create the frontend environment file:
+Create the frontend environment file only when it is absent. Do not overwrite existing frontend configuration:
 
 ### Windows PowerShell
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
 ### Linux/macOS
 
 ```bash
-cp .env.example .env
+test -f .env || cp .env.example .env
 ```
 
 Keep the local development value empty:
@@ -271,7 +271,7 @@ Open that URL in your browser.
 
 ---
 
-# 8. You Are Ready
+# 8. Local Service Topology
 
 At this point, the complete local environment should be running:
 
@@ -777,7 +777,61 @@ Run tests
 
 ---
 
-# 19. Repository Structure
+# 19. Evaluation Development
+
+The evaluation framework lives in `evaluation/`. It includes schemas, strict validation, a guarded HTTP runner, generic deterministic metrics, offline qualitative-review tooling, tests, metadata, selected aggregate comparisons, and the final report. Generic metric algorithms and synthetic tests are public. Official benchmark-specific matcher rules and answer fixtures remain private and are explicitly supplied for local official metric replay; see the [evaluation guide](../evaluation/README.md#automated-metrics).
+
+The public repository intentionally does not include the exact handbook-derived official benchmark or source PDF. Exact official-result reproduction requires authorized local copies matching the documented hashes:
+
+- benchmark metadata: `evaluation/benchmarks/README.md`;
+- corpus metadata: `evaluation/corpus/corpus_manifest.json` and `evaluation/corpus/README.md`.
+
+Place authorized local artifacts at:
+
+```text
+evaluation/benchmarks/csu_handbook_v1.jsonl
+evaluation/corpus/CSU-Student-Handbook.pdf
+```
+
+Both are ignored by Git. Validate their identities, schema, page count, and evidence anchors before an official run:
+
+```powershell
+.venv\Scripts\python.exe -m evaluation.validation --strict-csu-v1
+```
+
+Strict validation fails clearly when either private artifact is absent or mismatched. It never substitutes a synthetic benchmark for an official run.
+
+Run the public evaluation framework tests with:
+
+```powershell
+.venv\Scripts\python.exe -m pytest evaluation/tests -q -p no:cacheprovider
+```
+
+Official-CSU integration tests skip with an explicit reason when their private inputs are absent. Generic metric tests remain runnable from public files alone. Expected-point scoring requires an explicit matcher registry; missing rules fail clearly instead of selecting a benchmark or changing scoring silently.
+
+Inspect runner options without sending requests:
+
+```powershell
+.venv\Scripts\python.exe -m evaluation.runner --help
+```
+
+Live execution requires `--execute`, a dedicated evaluation account supplied through local environment variables, and the configured backend/Ollama services. When `--require-warmup` is used, supply `DDRAG_EVAL_WARMUP_QUESTION`; the warm-up is executed before benchmark questions and is never stored as a scored result. The reported comparisons used one unscored warm-up per arm. A new execution creates a new observation and does not replace the frozen published results.
+
+Generated runs are written under ignored `evaluation/runs/<run_id>/` directories. Reviewer packets, mappings, response/adjudication files, reviewer-level provenance, and internal question-level support artifacts also remain private and ignored. Never force-add them.
+
+The retained prompt is selected internally with:
+
+```text
+GENERATION_PROMPT_ID=ddrag-production-v1
+```
+
+If an existing `.env` needs this optional setting, edit it deliberately; never copy `.env.example` over the existing file. Unknown prompt IDs fail validation instead of silently changing behavior.
+
+The [evaluation article](../evaluation/reports/ddrag_evaluation_article.md) presents the findings; the [frozen evidence report](../evaluation/reports/ddrag_evaluation_report.md), structured summary, traceability matrix, and public manifest preserve their provenance. There is no configured one-command final-report regeneration tool. Repeating the protocol requires authorized matching corpus and benchmark inputs, and runtime-default sampling prevents a guarantee of identical outputs. Exact replay of the qualitative judgments additionally requires private review artifacts and the disclosed AI-assisted workflow.
+
+---
+
+# 20. Repository Structure
 
 The most important development directories are:
 
@@ -802,6 +856,8 @@ ddrag/
 ├── migrations/             # Alembic database migrations
 │   └── versions/
 │
+├── evaluation/             # Evaluation framework, metadata, tests, and public reports
+│
 ├── tests/                  # Automated backend tests
 │
 ├── storage/                # Local document storage
@@ -815,7 +871,7 @@ ddrag/
 
 ---
 
-# 20. Current Scope
+# 21. Current Scope
 
 The current implementation includes:
 
@@ -833,8 +889,7 @@ The current implementation includes:
 * React frontend
 * Dockerized backend and database
 * automated backend testing
-
-Systematic RAG evaluation and benchmarking are planned future work and are **not currently implemented**.
+* systematic RAG evaluation with public framework/tests and private official inputs
 
 ---
 
