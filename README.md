@@ -2,54 +2,78 @@
 
 **Drag, Drop, Retrieve, Augment, Generate**
 
-DDRAG is a local-first retrieval-augmented generation (RAG) application for asking questions about your own documents. It accepts PDF, DOCX, Markdown, and text files, retrieves relevant passages with PostgreSQL and pgvector, and generates answers locally through Ollama with source attribution.
+DDRAG is a local-first retrieval-augmented generation (RAG) application for asking questions about your own documents. Upload PDF, DOCX, Markdown, or text files, retrieve relevant passages with PostgreSQL + pgvector, and generate answers locally through Ollama with source attribution.
+
+Documents, embeddings, and model inference stay on your machine.
 
 ## Demo
 
 🎥 **[Watch the DDRAG demo on YouTube](https://youtu.be/F0H7eqERpBA)**
 
-The video demonstrates account creation, document ingestion, semantic retrieval, answers with source attribution, and persistent chat history.
-
-DDRAG runs locally with Docker, PostgreSQL + pgvector, and Ollama, keeping documents and model inference on the local machine.
+The demo covers account creation, document ingestion, semantic retrieval, answers with source attribution, and persistent chat history.
 
 ### Interface preview
 
 <p align="center">
-  <img src="docs/images/desktop-chat.png" alt="DDRAG desktop chat showing an answer, source attribution, and chat history" width="100%">
+  <img src="docs/images/desktop-chat.png" alt="DDRAG desktop chat showing an answer, retrieved source metadata, and chat history" width="100%">
 </p>
 
-*An example response with retrieved source metadata and a persisted chat session; source display alone does not establish answer grounding.*
+*Ask questions against your documents and inspect the retrieved sources used for the response.*
+
+<p align="center">
+  <img src="docs/images/desktop-documents.png" alt="DDRAG document library showing upload controls and a processed document" width="88%">
+</p>
+
+*Upload and manage documents from the authenticated document library.*
 
 <p align="center">
   <img src="docs/images/mobile-chat.png" alt="DDRAG responsive mobile chat interface" width="34%">
 </p>
 
-*The chat workflow adapted for a narrow viewport.*
+*The same chat workflow on a narrow viewport.*
 
 ## Features
 
 - JWT authentication with Argon2id password hashing and user-owned resources
-- PDF, DOCX, Markdown, and TXT ingestion with file validation and duplicate detection
-- deterministic, overlapping text chunks with versioned chunking metadata
+- PDF, DOCX, Markdown, and TXT ingestion with validation and duplicate detection
+- deterministic overlapping chunks with versioned chunking metadata
 - local embeddings and answer generation through Ollama
-- owner-scoped cosine-distance retrieval with PostgreSQL + pgvector
-- grounded prompts, source citations, and persistent chat history
+- owner-scoped vector retrieval with PostgreSQL + pgvector
+- grounded prompting, source attribution, and persistent chat history
 - responsive React interface
+- reproducible evaluation framework for retrieval, generation, grounding, refusal behavior, operational reliability, and latency
 
 ## How It Works
 
 ```text
-Upload document → Extract text → Create overlapping chunks → Generate embeddings
-       → Store in PostgreSQL + pgvector → Retrieve relevant owned chunks
-       → Build grounded context → Generate locally → Return answer + sources
+Upload document
+      ↓
+Extract text
+      ↓
+Create overlapping chunks
+      ↓
+Generate embeddings
+      ↓
+PostgreSQL + pgvector
+      ↓
+Retrieve relevant owned chunks
+      ↓
+Build RAG context
+      ↓
+Generate locally with Ollama
+      ↓
+Return answer + source metadata
 ```
 
-The backend treats retrieved text as reference material and instructs the model to answer from the supplied context. When retrieval returns no usable context, DDRAG returns an insufficient-information response without calling the generation model. Retrieval has no relevance threshold, so a non-empty result does not establish that the question is answerable.
+DDRAG treats retrieved document text as reference material and instructs the generation model to answer from the supplied context.
+
+If retrieval produces no usable context, DDRAG returns an insufficient-information response without invoking the generation model. The current retrieval implementation does not use a relevance threshold, so receiving non-empty retrieval results does not by itself mean that a question is answerable.
 
 ## Architecture
 
 ```text
 Browser / React + Vite
+          │
           │ REST
           ▼
        FastAPI
@@ -60,10 +84,14 @@ Browser / React + Vite
           │              │
           ├── local document storage
           ├── PostgreSQL + pgvector
-          └── Ollama (embeddings + generation)
+          └── Ollama
+              ├── embeddings
+              └── generation
 ```
 
-FastAPI handles authentication, authorization, ingestion, retrieval, generation, and persistence. The React frontend consumes the backend API. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for request flows, the data model, security boundaries, and detailed tradeoffs.
+FastAPI handles authentication, authorization, document ingestion, retrieval, generation, and persistence. The React frontend consumes the backend API.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for request flows, the data model, security boundaries, and design tradeoffs.
 
 ## Tech Stack
 
@@ -78,18 +106,43 @@ FastAPI handles authentication, authorization, ingestion, retrieval, generation,
 
 ## Quick Start
 
-Prerequisites: Git, Docker with Docker Compose, Ollama, and Node.js with npm. Python 3.13 is only required when running the backend outside Docker.
+### Prerequisites
 
-Clone the repository:
+Install:
+
+- Git
+- Docker with Docker Compose
+- Ollama
+- Node.js with npm
+
+Python 3.13 is only required when running the backend directly outside Docker.
+
+### 1. Clone DDRAG
 
 ```bash
 git clone https://github.com/drZania/ddrag.git
 cd ddrag
 ```
 
-If the backend `.env` file is absent, create it with `if (-not (Test-Path .env)) { Copy-Item .env.example .env }` in PowerShell or `test -f .env || cp .env.example .env` on Linux/macOS. Preserve any existing `.env`. Replace the checked-in `JWT_SECRET` placeholder in a newly created file with a unique local value.
+### 2. Configure the backend
 
-Pull the local models and start the database and backend:
+Create `.env` only if it does not already exist.
+
+**PowerShell**
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+**Linux/macOS**
+
+```bash
+test -f .env || cp .env.example .env
+```
+
+Replace the checked-in `JWT_SECRET` placeholder in a newly created `.env` with a unique local value.
+
+### 3. Prepare Ollama and start the backend
 
 ```bash
 ollama pull qwen3-embedding:0.6b
@@ -97,25 +150,91 @@ ollama pull qwen2.5:1.5b
 docker compose up -d
 ```
 
-In a second terminal, prepare and start the frontend:
+DDRAG uses:
+
+- `qwen3-embedding:0.6b` for embeddings
+- `qwen2.5:1.5b` for answer generation
+
+The backend applies Alembic migrations on startup and exposes its health endpoint at:
+
+```text
+http://localhost:8000/health
+```
+
+### 4. Start the frontend
+
+In another terminal:
 
 ```bash
 cd frontend
 npm ci
-# PowerShell: if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-# Linux/macOS: test -f .env || cp .env.example .env
+```
+
+Create `frontend/.env` only if it is absent.
+
+**PowerShell**
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+**Linux/macOS**
+
+```bash
+test -f .env || cp .env.example .env
+```
+
+Then start Vite:
+
+```bash
 npm run dev
 ```
 
-Open the Vite URL, normally `http://localhost:5173`. The backend applies Alembic migrations on startup and exposes `http://localhost:8000/health`.
+Open the URL printed by Vite, normally:
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed Windows, Linux, and macOS setup, backend development, test database setup, reset behavior, and troubleshooting.
+```text
+http://localhost:5173
+```
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for Windows, Linux, and macOS setup, backend development, test database configuration, reset behavior, and troubleshooting.
+
+<details>
+<summary><strong>Agent-assisted setup</strong></summary>
+
+<br>
+
+DDRAG includes an [`AGENTS.md`](AGENTS.md) setup guide for repository-capable coding agents.
+
+Paste this into Codex, Copilot, Claude Code, or another repository-aware coding agent:
+
+```text
+Set up DDRAG from https://github.com/drZania/ddrag.git for local development.
+
+Follow the repository's AGENTS.md for prerequisites, environment setup,
+Ollama models, Docker services, frontend setup, and verification.
+
+Preserve existing environment files, databases, uploaded documents,
+and Docker volumes. Do not commit or push anything unless explicitly requested.
+
+Report which prerequisites and services were successfully verified and
+any manual action still required.
+```
+
+</details>
 
 ## Testing
 
-Backend tests require `TEST_DATABASE_URL` to point to a dedicated PostgreSQL database whose name contains `test`. Never point it at the development database. See [Running Tests](docs/DEVELOPMENT.md#14-running-tests) before running `pytest`.
+Backend tests require `TEST_DATABASE_URL` to point to a dedicated PostgreSQL database whose name contains `test`.
 
-Frontend checks:
+Never run the test suite against the development database.
+
+See [Running Tests](docs/DEVELOPMENT.md#14-running-tests) before running:
+
+```bash
+pytest
+```
+
+Frontend verification:
 
 ```bash
 cd frontend
@@ -126,44 +245,94 @@ npm run build
 
 ## Evaluation
 
-DDRAG evaluates retrieval, answer correctness, grounding, refusal behavior, operational reliability, and latency as separate dimensions. It does not combine them into one overall accuracy score.
+DDRAG includes a reproducible evaluation framework designed to measure different parts of the RAG pipeline separately rather than collapsing them into a single accuracy score.
 
-The evaluation uses a fixed 40-question Caraga State University (CSU) Student Handbook benchmark: 34 answerable, 3 ambiguous, and 3 unanswerable questions. The source PDF and handbook-derived benchmark are not redistributed; reproducing the study requires authorized copies matching the published [benchmark metadata](evaluation/benchmarks/README.md) and [corpus identity](evaluation/corpus/README.md).
+The evaluation covers:
 
-Historical baseline retrieval results over the 37 retrieval-eligible questions were:
+- retrieval
+- answer completeness and correctness
+- grounding
+- refusal and over-refusal behavior
+- operational reliability
+- latency
+
+### Benchmark
+
+The primary benchmark uses **40 manually reviewed questions** derived from the Caraga State University Student Handbook:
+
+| Question type | Count |
+| --- | ---: |
+| Answerable | 34 |
+| Ambiguous | 3 |
+| Unanswerable | 3 |
+| **Total** | **40** |
+
+The source handbook and handbook-derived benchmark content are not redistributed. Reproducing the study requires an authorized copy matching the published [benchmark metadata](evaluation/benchmarks/README.md) and [corpus identity](evaluation/corpus/README.md).
+
+### Baseline retrieval
+
+Across the **37 retrieval-eligible questions**:
 
 | Metric | Result |
 | --- | ---: |
-| Hit@5 | 0.973 |
-| Recall@5 | 0.851 |
-| CompleteEvidence@5 | 0.730 |
+| Hit@5 | **0.973** |
+| Recall@5 | **0.851** |
+| CompleteEvidence@5 | **0.730** |
 
-These are retrieval measures, not overall answer accuracy. Complete evidence retrieval remained weaker than finding at least one required evidence unit, and generation incompleteness could remain even when retrieval was complete.
+These are retrieval metrics, not overall answer-accuracy scores.
 
-Under the frozen benchmark and tested local setup, the paired generation-model experiment did not support adopting `qwen2.5:3b`; DDRAG retained `qwen2.5:1.5b`. The `ddrag-answer-completeness-v1` prompt produced some useful refusal improvements but did not improve the predeclared complete-retrieval generation-failure population, so `ddrag-production-v1` was retained.
+DDRAG usually retrieved at least one required evidence unit, while retrieving **all** evidence required by multi-evidence questions remained more difficult. Generation could also remain incomplete even when retrieval was complete.
+
+### Controlled comparisons
+
+The evaluation tested generation-model and prompt changes while holding the rest of the relevant configuration fixed.
+
+Under the CSU Student Handbook benchmark and tested local environment:
+
+- `qwen2.5:3b` did not provide enough evidence to justify replacing `qwen2.5:1.5b`
+- the `ddrag-answer-completeness-v1` prompt improved some refusal behavior but did not improve the predeclared complete-retrieval generation-failure population
+- DDRAG therefore retained `qwen2.5:1.5b` with `ddrag-production-v1`
 
 The retained tested configuration is:
 
-| Component | Value |
+| Component | Retained configuration |
 | --- | --- |
-| Generation | `qwen2.5:1.5b` |
+| Generation model | `qwen2.5:1.5b` |
+| Embedding model | `qwen3-embedding:0.6b` |
 | Prompt | `ddrag-production-v1` |
-| Embedding | `qwen3-embedding:0.6b` |
 | Retrieval | owner-scoped pgvector cosine, top-K 5 |
-| Chunking | 1000 characters with 200-character overlap |
+| Chunking | 1000 characters, 200-character overlap |
 
-Only the generation model and generation prompt received completed controlled comparisons. The embedding model, top-K, chunk size, chunk overlap, and retrieval strategy were retained for continuity and were not established as optimal.
+Only the **generation model** and **generation prompt** received completed controlled comparisons. The embedding model, retrieval strategy, top-K, chunk size, and overlap were retained for continuity and should not be interpreted as experimentally established optima.
 
-Qualitative judgments used blinded AI-assisted review and independent adjudication; they complement deterministic metrics and do not constitute an objective ground truth. Known limitations include incomplete multi-chunk and summarization coverage, substantial local generation latency, one corpus and 40-question benchmark, and private inputs required to reproduce the study. See the [evaluation article](evaluation/reports/ddrag_evaluation_article.md), [evaluation guide](evaluation/README.md), and [frozen evidence report](evaluation/reports/ddrag_evaluation_report.md).
+Qualitative judgments used blinded AI-assisted review with independent adjudication. Source identifiers shown by the application identify retrieved context but are not treated by the evaluation as automatic proof that every generated claim is grounded.
+
+The study is intentionally scoped: it uses one corpus, a 40-question benchmark, local inference, and a limited number of controlled configurations. Results describe the tested DDRAG setup rather than universal model rankings.
+
+For the complete methodology, evidence, results, and limitations, see:
+
+- [Evaluation overview](evaluation/README.md)
+- [Evaluation article](evaluation/reports/ddrag_evaluation_article.md)
+- [Frozen evidence report](evaluation/reports/ddrag_evaluation_report.md)
 
 ## Design Highlights
 
-- **PostgreSQL + pgvector** keeps relational ownership data, document chunks, and embeddings in one transactional data store.
-- **Local inference through Ollama** keeps embedding and generation requests on the local machine.
-- **Grounded source attribution** persists the retrieved chunks used for an answer so the interface can display backend-provided sources.
-- **Backend-enforced ownership** derives resource access from the authenticated user and scopes document, retrieval, and chat queries server-side.
+**PostgreSQL + pgvector**  
+Relational ownership data, document chunks, and vector embeddings remain in one transactional data store.
 
-See [Key Design Decisions](docs/ARCHITECTURE.md#21-key-design-decisions) for detailed tradeoffs and architecture discussion.
+**Local inference**  
+Embedding and generation requests are handled locally through Ollama.
+
+**Inspectable retrieval**  
+Responses preserve backend-provided source metadata so users can inspect the retrieved context associated with an answer.
+
+**Backend-enforced ownership**  
+Resource access is derived from the authenticated user, and document, retrieval, and chat queries are owner-scoped server-side.
+
+**Evaluation-first measurement**  
+Question-level results separate retrieval failures, generation failures, refusal behavior, operational errors, and latency rather than reporting a single opaque score.
+
+See [Key Design Decisions](docs/ARCHITECTURE.md#21-key-design-decisions) for additional architecture discussion.
 
 ## Project Structure
 
@@ -172,9 +341,10 @@ app/                    FastAPI application and RAG pipeline
 frontend/src/           React interface and API client
 migrations/             Alembic schema history
 tests/                  Backend tests and database safety setup
-evaluation/             Evaluation framework, metadata, selected evidence, and reports
+evaluation/             Evaluation framework, metadata, evidence, and reports
 docs/ARCHITECTURE.md    System design and request flows
-docs/DEVELOPMENT.md     Detailed local development guide
+docs/DEVELOPMENT.md     Local development and troubleshooting guide
+AGENTS.md               Safe setup instructions for coding agents
 ```
 
 ## License
